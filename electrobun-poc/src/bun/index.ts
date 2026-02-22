@@ -21,6 +21,10 @@ async function getMainViewUrl(): Promise<string> {
 	return "views://mainview/index.html";
 }
 
+function dateKey(d: Date) {
+	return d.toISOString().slice(0, 10);
+}
+
 Bun.serve({
 	port: API_PORT,
 	async fetch(req) {
@@ -62,6 +66,48 @@ Bun.serve({
 				focusMinutesToday: Math.floor(focusSeconds / 60),
 				completedPomodoros: sessions.length,
 			});
+		}
+
+		if (req.method === "GET" && url.pathname === "/api/focus-sessions/recent") {
+			const sessions = await prisma.focusSession.findMany({
+				where: { phase: "focus", completed: true },
+				orderBy: { createdAt: "desc" },
+				take: 8,
+			});
+			return Response.json(sessions);
+		}
+
+		if (req.method === "GET" && url.pathname === "/api/kpis/streak") {
+			const sessions = await prisma.focusSession.findMany({
+				where: { phase: "focus", completed: true },
+				orderBy: { createdAt: "desc" },
+				take: 120,
+			});
+			const days = Array.from(new Set(sessions.map((s) => dateKey(new Date(s.createdAt)))));
+			let streak = 0;
+			let cursor = new Date();
+			cursor.setHours(0, 0, 0, 0);
+
+			for (let i = 0; i < 120; i++) {
+				const key = dateKey(cursor);
+				if (days.includes(key)) {
+					streak++;
+					cursor.setDate(cursor.getDate() - 1);
+					continue;
+				}
+				if (i === 0) {
+					cursor.setDate(cursor.getDate() - 1);
+					const yesterday = dateKey(cursor);
+					if (days.includes(yesterday)) {
+						streak++;
+						cursor.setDate(cursor.getDate() - 1);
+						continue;
+					}
+				}
+				break;
+			}
+
+			return Response.json({ streakDays: streak });
 		}
 
 		return new Response("Not found", { status: 404 });

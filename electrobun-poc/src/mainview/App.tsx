@@ -15,6 +15,14 @@ import { resolveLockMode, type FocusTask } from "./domain/stratumPolicy";
 
 const API_BASE = "http://127.0.0.1:4187";
 
+type RecentSession = {
+  id: string;
+  taskTitle: string;
+  lockMode: string;
+  elapsedSeconds: number;
+  createdAt: string;
+};
+
 const starterTasks: FocusTask[] = [
   { id: "t1", title: "Arquitectura Stratum Engine", requiresComputer: true },
   { id: "t2", title: "Caminar + pensar roadmap", requiresComputer: false },
@@ -34,6 +42,8 @@ export default function App() {
   const [config, setConfig] = useState<TimerConfig>(defaultTimerConfig);
   const [timer, setTimer] = useState<TimerState>(() => createInitialTimerState(defaultTimerConfig));
   const [kpis, setKpis] = useState({ focusMinutesToday: 0, completedPomodoros: 0 });
+  const [streakDays, setStreakDays] = useState(0);
+  const [recentSessions, setRecentSessions] = useState<RecentSession[]>([]);
   const prevPhase = useRef<TimerState["phase"]>("idle");
 
   const activeTask = useMemo(() => tasks.find((t) => t.id === taskId) ?? tasks[0], [tasks, taskId]);
@@ -41,8 +51,17 @@ export default function App() {
 
   async function refreshKpis() {
     try {
-      const res = await fetch(`${API_BASE}/api/kpis/today`);
-      if (res.ok) setKpis(await res.json());
+      const [todayRes, streakRes, recentRes] = await Promise.all([
+        fetch(`${API_BASE}/api/kpis/today`),
+        fetch(`${API_BASE}/api/kpis/streak`),
+        fetch(`${API_BASE}/api/focus-sessions/recent`),
+      ]);
+      if (todayRes.ok) setKpis(await todayRes.json());
+      if (streakRes.ok) {
+        const s = await streakRes.json();
+        setStreakDays(s.streakDays ?? 0);
+      }
+      if (recentRes.ok) setRecentSessions(await recentRes.json());
     } catch {
       // noop
     }
@@ -146,8 +165,8 @@ export default function App() {
               <p className="text-4xl mt-2 font-semibold">{kpis.completedPomodoros}</p>
             </article>
             <article className="kpi-tile">
-              <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Task Channel</p>
-              <p className="text-2xl mt-2 font-semibold">{activeTask.requiresComputer ? "Computer" : "Offline"}</p>
+              <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Current Streak</p>
+              <p className="text-3xl mt-2 font-semibold">{streakDays} días</p>
             </article>
           </aside>
         </section>
@@ -187,6 +206,41 @@ export default function App() {
               </label>
             </div>
           </article>
+        </section>
+
+        <section className="glass-card rounded-3xl p-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold">Recent Focus Sessions</h2>
+            <button className="btn-muted !px-3 !py-1.5 text-xs" onClick={() => refreshKpis()}>Refresh</button>
+          </div>
+          <div className="mt-4 overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-left text-slate-400 border-b border-slate-700/60">
+                  <th className="pb-2 font-medium">Hora</th>
+                  <th className="pb-2 font-medium">Task</th>
+                  <th className="pb-2 font-medium">Lock</th>
+                  <th className="pb-2 font-medium text-right">Duración</th>
+                </tr>
+              </thead>
+              <tbody>
+                {recentSessions.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="py-4 text-slate-500">Sin sesiones registradas aún.</td>
+                  </tr>
+                ) : (
+                  recentSessions.map((s) => (
+                    <tr key={s.id} className="border-b border-slate-800/70 text-slate-200">
+                      <td className="py-2">{new Date(s.createdAt).toLocaleString()}</td>
+                      <td className="py-2">{s.taskTitle}</td>
+                      <td className="py-2 uppercase text-cyan-300">{s.lockMode}</td>
+                      <td className="py-2 text-right">{Math.floor(s.elapsedSeconds / 60)} min</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </section>
       </div>
     </main>
