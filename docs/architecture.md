@@ -10,3 +10,7 @@
 `requiresComputer` from task drives lock policy:
 - true -> soft lock
 - false -> hard lock
+
+
+## Internal Codename
+- Core decision/policy subsystem: **Stratum Engine**

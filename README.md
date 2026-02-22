@@ -1,9 +1,9 @@
-# Executive Focus OS
+# Aurelia
 
-Desktop MVP de productividad personal (Pomodoro Pro + Integraciones + Hard Focus Lock).
+Desktop assistant de productividad personal (Pomodoro Pro + Integraciones + Hard Focus Lock).
 
 ## Vision
-Executive Focus OS convierte sesiones de enfoque en un sistema operativo personal de ejecución:
+Aurelia convierte sesiones de enfoque en un sistema operativo personal de ejecución:
 - Timer Pomodoro avanzado con tasks, tags, métricas y streaks.
 - Integración con Google Calendar para sugerir bloques reales de enfoque.
 - Hard Focus Lock inteligente según tipo de tarea:
@@ -46,3 +46,6 @@ Consulta [`docs/roadmap.md`](docs/roadmap.md).
 
 ## License
 MIT
+
+## Internal Architecture Name
+- **Stratum Engine**: task classification + lock policy brain.
