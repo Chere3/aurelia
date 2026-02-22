@@ -113,7 +113,7 @@ export default function App() {
   }, [timer.phase]);
 
   return (
-    <main className="min-h-screen px-6 py-8 md:px-10">
+    <main className="h-full overflow-y-auto px-6 py-8 md:px-10">
       <div className="mx-auto max-w-7xl space-y-6">
         <header className="glass-card rounded-3xl p-7 md:p-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>

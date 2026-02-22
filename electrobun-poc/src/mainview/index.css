@@ -6,12 +6,18 @@
   color-scheme: dark;
 }
 
+html, body, #root {
+  height: 100%;
+}
+
 body {
   @apply bg-[#070a12] text-slate-100 antialiased;
   background-image:
     radial-gradient(circle at 15% 10%, rgba(35, 84, 170, 0.35), transparent 38%),
     radial-gradient(circle at 85% 20%, rgba(0, 198, 255, 0.16), transparent 34%),
     linear-gradient(120deg, #06090f 0%, #0b1220 48%, #070a12 100%);
+  overflow: hidden;
+  -webkit-app-region: no-drag;
 }
 
 .glass-card {
