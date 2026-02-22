@@ -1,3 +1,31 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  @apply bg-[#070a12] text-slate-100 antialiased;
+  background-image:
+    radial-gradient(circle at 15% 10%, rgba(35, 84, 170, 0.35), transparent 38%),
+    radial-gradient(circle at 85% 20%, rgba(0, 198, 255, 0.16), transparent 34%),
+    linear-gradient(120deg, #06090f 0%, #0b1220 48%, #070a12 100%);
+}
+
+.glass-card {
+  @apply border border-slate-700/60 bg-slate-900/55 backdrop-blur-xl shadow-2xl shadow-cyan-950/20;
+}
+
+.kpi-tile {
+  @apply rounded-2xl glass-card p-5 transition-all duration-300 hover:border-cyan-400/40 hover:-translate-y-0.5;
+}
+
+.btn-primary {
+  @apply px-4 py-2 rounded-lg bg-cyan-400 text-slate-950 font-semibold tracking-wide transition hover:bg-cyan-300;
+}
+
+.btn-muted {
+  @apply px-4 py-2 rounded-lg bg-slate-800/90 border border-slate-600 text-slate-200 transition hover:bg-slate-700;
+}
