@@ -1,13 +1,18 @@
 {
   "name": "aurelia",
   "private": true,
-  "version": "0.1.0",
-  "description": "Desktop MVP for executive-grade Pomodoro focus system",
+  "version": "0.2.0",
+  "description": "Desktop assistant de productividad personal (Pomodoro Pro + Integraciones + Hard Focus Lock)",
   "license": "MIT",
+  "packageManager": "bun@1.0.3",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
-    "dev": "echo \"Desktop scaffold pending\"",
-    "build": "echo \"Build scaffold pending\"",
-    "lint": "echo \"Lint scaffold pending\"",
-    "test": "echo \"Test scaffold pending\""
+    "dev": "cd apps/desktop && bun run dev",
+    "build": "cd apps/desktop && bun run build",
+    "typecheck": "cd apps/desktop && bunx tsc -b",
+    "lint": "echo 'lint pending'"
   }
 }

@@ -1,0 +1,11 @@
+:root { color-scheme: dark; font-family: Inter, system-ui, sans-serif; }
+body { margin: 0; background: #0d1117; color: #e6edf3; }
+.shell { max-width: 980px; margin: 48px auto; padding: 0 24px; }
+header h1 { margin: 0; font-size: 36px; letter-spacing: .5px; }
+header p { margin: 8px 0 24px; color: #9da7b3; }
+.card { background: #161b22; border: 1px solid #2f3742; border-radius: 14px; padding: 20px; display: grid; gap: 12px; }
+label { display: grid; gap: 8px; font-size: 14px; color: #9da7b3; }
+input[type='text'], input:not([type]) { background: #0d1117; border: 1px solid #2f3742; color: #e6edf3; border-radius: 8px; padding: 10px; }
+.checkbox { grid-template-columns: auto 1fr; align-items: center; gap: 10px; }
+.metric { margin-top: 12px; border-top: 1px solid #2f3742; padding-top: 12px; display: flex; justify-content: space-between; align-items: center; }
+.metric strong { color: #58a6ff; }

@@ -11,7 +11,8 @@ Aurelia convierte sesiones de enfoque en un sistema operativo personal de ejecuc
   - **No-PC task** → lock agresivo (interacción del sistema restringida)
 
 ## MVP Scope
-- Electron + React + TypeScript
+- Desktop shell con Bun-first toolchain (Electrobun candidate, fallback Electron+Vite activo)
+- React + TypeScript
 - SQLite + Prisma
 - Zustand + UI ejecutiva
 - Motor de timer + policy engine
