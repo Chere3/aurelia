@@ -3,12 +3,15 @@ import { prisma } from "./db";
 import { google } from "googleapis";
 import fs from "node:fs";
 import path from "node:path";
+import { execSync } from "node:child_process";
 
 const DEV_SERVER_PORT = 5173;
 const DEV_SERVER_URL = `http://localhost:${DEV_SERVER_PORT}`;
 const API_PORT = 4187;
 
 const TOKEN_PATH = path.join(process.env.HOME || "", ".clawd", "google-calendar-token.json");
+const REFRESH_SCRIPT = "/home/diego/clawd/skills/google-calendar/scripts/refresh_token.js";
+const NODE_BIN = "/home/diego/.local/share/fnm/node-versions/v22.22.0/installation/bin/node";
 
 async function getMainViewUrl(): Promise<string> {
 	const channel = await Updater.localInfo.channel();
@@ -40,6 +43,15 @@ function requiresComputerFromSummary(summary: string) {
 async function getCalendarTasksToday() {
 	if (!fs.existsSync(TOKEN_PATH)) return [];
 	try {
+		try {
+			execSync(`${NODE_BIN} ${REFRESH_SCRIPT}`, {
+				stdio: "pipe",
+				timeout: 20000,
+				shell: "/bin/bash",
+			});
+		} catch {
+			// continue with existing token if refresh fails
+		}
 		const token = JSON.parse(fs.readFileSync(TOKEN_PATH, "utf8"));
 		const oauth2Client = new google.auth.OAuth2();
 		oauth2Client.setCredentials(token);
