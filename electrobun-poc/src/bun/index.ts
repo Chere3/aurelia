@@ -1,9 +1,14 @@
 import { BrowserWindow, Updater, Utils } from "electrobun/bun";
 import { prisma } from "./db";
+import { google } from "googleapis";
+import fs from "node:fs";
+import path from "node:path";
 
 const DEV_SERVER_PORT = 5173;
 const DEV_SERVER_URL = `http://localhost:${DEV_SERVER_PORT}`;
 const API_PORT = 4187;
+
+const TOKEN_PATH = path.join(process.env.HOME || "", ".clawd", "google-calendar-token.json");
 
 async function getMainViewUrl(): Promise<string> {
 	const channel = await Updater.localInfo.channel();
@@ -25,10 +30,59 @@ function dateKey(d: Date) {
 	return d.toISOString().slice(0, 10);
 }
 
+function requiresComputerFromSummary(summary: string) {
+	const s = summary.toLowerCase();
+	const noPcHints = ["walk", "caminar", "gym", "gimnasio", "run", "correr", "comida", "almuerzo", "llamada", "call", "offline", "descanso"];
+	if (noPcHints.some((k) => s.includes(k))) return false;
+	return true;
+}
+
+async function getCalendarTasksToday() {
+	if (!fs.existsSync(TOKEN_PATH)) return [];
+	try {
+		const token = JSON.parse(fs.readFileSync(TOKEN_PATH, "utf8"));
+		const oauth2Client = new google.auth.OAuth2();
+		oauth2Client.setCredentials(token);
+		const calendar = google.calendar({ version: "v3", auth: oauth2Client });
+
+		const start = new Date();
+		start.setHours(0, 0, 0, 0);
+		const end = new Date(start);
+		end.setDate(end.getDate() + 1);
+
+		const response = await calendar.events.list({
+			calendarId: "primary",
+			timeMin: start.toISOString(),
+			timeMax: end.toISOString(),
+			singleEvents: true,
+			orderBy: "startTime",
+			maxResults: 30,
+		});
+
+		const items = response.data.items || [];
+		return items
+			.filter((e) => Boolean(e.summary) && Boolean(e.start?.dateTime))
+			.map((e) => ({
+				id: e.id || crypto.randomUUID(),
+				title: e.summary || "Evento",
+				requiresComputer: requiresComputerFromSummary(e.summary || ""),
+				start: e.start?.dateTime,
+			}));
+	} catch (err) {
+		console.error("Calendar task fetch error:", err);
+		return [];
+	}
+}
+
 Bun.serve({
 	port: API_PORT,
 	async fetch(req) {
 		const url = new URL(req.url);
+
+		if (req.method === "GET" && url.pathname === "/api/tasks/today") {
+			const tasks = await getCalendarTasksToday();
+			return Response.json(tasks);
+		}
 
 		if (req.method === "POST" && url.pathname === "/api/focus-sessions") {
 			const payload = await req.json();

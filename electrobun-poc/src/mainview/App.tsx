@@ -37,7 +37,7 @@ function phaseLabel(phase: TimerState["phase"]) {
 }
 
 export default function App() {
-  const [tasks] = useState(starterTasks);
+  const [tasks, setTasks] = useState(starterTasks);
   const [taskId, setTaskId] = useState(starterTasks[0].id);
   const [config, setConfig] = useState<TimerConfig>(defaultTimerConfig);
   const [timer, setTimer] = useState<TimerState>(() => createInitialTimerState(defaultTimerConfig));
@@ -46,7 +46,10 @@ export default function App() {
   const [recentSessions, setRecentSessions] = useState<RecentSession[]>([]);
   const prevPhase = useRef<TimerState["phase"]>("idle");
 
-  const activeTask = useMemo(() => tasks.find((t) => t.id === taskId) ?? tasks[0], [tasks, taskId]);
+  const activeTask = useMemo(
+    () => tasks.find((t) => t.id === taskId) ?? tasks[0] ?? starterTasks[0],
+    [tasks, taskId]
+  );
   const lockMode = useMemo(() => resolveLockMode(activeTask), [activeTask]);
 
   async function refreshKpis() {
@@ -92,6 +95,20 @@ export default function App() {
 
   useEffect(() => {
     refreshKpis();
+
+    (async () => {
+      try {
+        const res = await fetch(`${API_BASE}/api/tasks/today`);
+        if (!res.ok) return;
+        const calendarTasks = await res.json();
+        if (Array.isArray(calendarTasks) && calendarTasks.length > 0) {
+          setTasks(calendarTasks);
+          setTaskId(calendarTasks[0].id);
+        }
+      } catch {
+        // fallback to local starter tasks
+      }
+    })();
   }, []);
 
   useEffect(() => {
