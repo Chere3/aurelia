@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   createInitialTimerState,
   defaultTimerConfig,
@@ -12,6 +12,8 @@ import {
   type TimerState,
 } from "./domain/timerEngine";
 import { resolveLockMode, type FocusTask } from "./domain/stratumPolicy";
+
+const API_BASE = "http://127.0.0.1:4187";
 
 const starterTasks: FocusTask[] = [
   { id: "t1", title: "Arquitectura Stratum Engine", requiresComputer: true },
@@ -31,9 +33,47 @@ export default function App() {
   const [taskId, setTaskId] = useState(starterTasks[0].id);
   const [config, setConfig] = useState<TimerConfig>(defaultTimerConfig);
   const [timer, setTimer] = useState<TimerState>(() => createInitialTimerState(defaultTimerConfig));
+  const [kpis, setKpis] = useState({ focusMinutesToday: 0, completedPomodoros: 0 });
+  const prevPhase = useRef<TimerState["phase"]>("idle");
 
   const activeTask = useMemo(() => tasks.find((t) => t.id === taskId) ?? tasks[0], [tasks, taskId]);
   const lockMode = useMemo(() => resolveLockMode(activeTask), [activeTask]);
+
+  async function refreshKpis() {
+    try {
+      const res = await fetch(`${API_BASE}/api/kpis/today`);
+      if (res.ok) setKpis(await res.json());
+    } catch {
+      // keep UI resilient
+    }
+  }
+
+  async function persistCompletedFocus() {
+    try {
+      await fetch(`${API_BASE}/api/focus-sessions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          phase: "focus",
+          taskTitle: activeTask.title,
+          requiresComputer: activeTask.requiresComputer,
+          lockMode,
+          plannedSeconds: config.focusMinutes * 60,
+          elapsedSeconds: config.focusMinutes * 60,
+          completed: true,
+          startedAt: new Date(Date.now() - config.focusMinutes * 60_000).toISOString(),
+          endedAt: new Date().toISOString(),
+        }),
+      });
+      await refreshKpis();
+    } catch {
+      // noop
+    }
+  }
+
+  useEffect(() => {
+    refreshKpis();
+  }, []);
 
   useEffect(() => {
     const id = setInterval(() => {
@@ -41,6 +81,17 @@ export default function App() {
     }, 1000);
     return () => clearInterval(id);
   }, [config]);
+
+  useEffect(() => {
+    const before = prevPhase.current;
+    const after = timer.phase;
+
+    if (before === "focus" && (after === "short_break" || after === "long_break")) {
+      void persistCompletedFocus();
+    }
+
+    prevPhase.current = after;
+  }, [timer.phase]);
 
   return (
     <div className="min-h-screen bg-[#0a0d14] text-slate-100 px-8 py-10">
@@ -87,6 +138,21 @@ export default function App() {
           </article>
         </section>
 
+        <section className="grid md:grid-cols-3 gap-4">
+          <article className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
+            <p className="text-slate-400 text-sm">Focus Minutes Today</p>
+            <p className="text-3xl font-semibold mt-2">{kpis.focusMinutesToday}</p>
+          </article>
+          <article className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
+            <p className="text-slate-400 text-sm">Completed Pomodoros</p>
+            <p className="text-3xl font-semibold mt-2">{kpis.completedPomodoros}</p>
+          </article>
+          <article className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
+            <p className="text-slate-400 text-sm">Current Task Type</p>
+            <p className="text-2xl font-semibold mt-2">{activeTask.requiresComputer ? "PC" : "No PC"}</p>
+          </article>
+        </section>
+
         <section className="grid md:grid-cols-2 gap-4">
           <article className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
             <h2 className="text-lg font-medium">Task Selector</h2>
@@ -108,43 +174,19 @@ export default function App() {
             <div className="grid grid-cols-2 gap-3 mt-4 text-sm">
               <label className="flex flex-col gap-1 text-slate-400">
                 Focus
-                <input
-                  className="bg-slate-950 border border-slate-700 rounded px-2 py-1 text-white"
-                  type="number"
-                  min={1}
-                  value={config.focusMinutes}
-                  onChange={(e) => setConfig((c) => ({ ...c, focusMinutes: Number(e.target.value) || 1 }))}
-                />
+                <input className="bg-slate-950 border border-slate-700 rounded px-2 py-1 text-white" type="number" min={1} value={config.focusMinutes} onChange={(e) => setConfig((c) => ({ ...c, focusMinutes: Number(e.target.value) || 1 }))} />
               </label>
               <label className="flex flex-col gap-1 text-slate-400">
                 Short Break
-                <input
-                  className="bg-slate-950 border border-slate-700 rounded px-2 py-1 text-white"
-                  type="number"
-                  min={1}
-                  value={config.shortBreakMinutes}
-                  onChange={(e) => setConfig((c) => ({ ...c, shortBreakMinutes: Number(e.target.value) || 1 }))}
-                />
+                <input className="bg-slate-950 border border-slate-700 rounded px-2 py-1 text-white" type="number" min={1} value={config.shortBreakMinutes} onChange={(e) => setConfig((c) => ({ ...c, shortBreakMinutes: Number(e.target.value) || 1 }))} />
               </label>
               <label className="flex flex-col gap-1 text-slate-400">
                 Long Break
-                <input
-                  className="bg-slate-950 border border-slate-700 rounded px-2 py-1 text-white"
-                  type="number"
-                  min={1}
-                  value={config.longBreakMinutes}
-                  onChange={(e) => setConfig((c) => ({ ...c, longBreakMinutes: Number(e.target.value) || 1 }))}
-                />
+                <input className="bg-slate-950 border border-slate-700 rounded px-2 py-1 text-white" type="number" min={1} value={config.longBreakMinutes} onChange={(e) => setConfig((c) => ({ ...c, longBreakMinutes: Number(e.target.value) || 1 }))} />
               </label>
               <label className="flex flex-col gap-1 text-slate-400">
                 Long Every
-                <input
-                  className="bg-slate-950 border border-slate-700 rounded px-2 py-1 text-white"
-                  type="number"
-                  min={2}
-                  value={config.longBreakEvery}
-                  onChange={(e) => setConfig((c) => ({ ...c, longBreakEvery: Number(e.target.value) || 2 }))}
-                />
+                <input className="bg-slate-950 border border-slate-700 rounded px-2 py-1 text-white" type="number" min={2} value={config.longBreakEvery} onChange={(e) => setConfig((c) => ({ ...c, longBreakEvery: Number(e.target.value) || 2 }))} />
               </label>
             </div>
           </article>

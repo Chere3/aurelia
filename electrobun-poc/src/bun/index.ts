@@ -1,9 +1,10 @@
 import { BrowserWindow, Updater, Utils } from "electrobun/bun";
+import { prisma } from "./db";
 
 const DEV_SERVER_PORT = 5173;
 const DEV_SERVER_URL = `http://localhost:${DEV_SERVER_PORT}`;
+const API_PORT = 4187;
 
-// Check if Vite dev server is running for HMR
 async function getMainViewUrl(): Promise<string> {
 	const channel = await Updater.localInfo.channel();
 	if (channel === "dev") {
@@ -20,23 +21,69 @@ async function getMainViewUrl(): Promise<string> {
 	return "views://mainview/index.html";
 }
 
-// Create the main application window
-const url = await getMainViewUrl();
+Bun.serve({
+	port: API_PORT,
+	async fetch(req) {
+		const url = new URL(req.url);
 
-const mainWindow = new BrowserWindow({
-	title: "React + Tailwind + Vite",
-	url,
-	frame: {
-		width: 900,
-		height: 700,
-		x: 200,
-		y: 200,
+		if (req.method === "POST" && url.pathname === "/api/focus-sessions") {
+			const payload = await req.json();
+			const session = await prisma.focusSession.create({
+				data: {
+					phase: payload.phase,
+					taskTitle: payload.taskTitle,
+					requiresComputer: Boolean(payload.requiresComputer),
+					lockMode: payload.lockMode,
+					plannedSeconds: Number(payload.plannedSeconds ?? 0),
+					elapsedSeconds: Number(payload.elapsedSeconds ?? 0),
+					completed: Boolean(payload.completed),
+					startedAt: payload.startedAt ? new Date(payload.startedAt) : new Date(),
+					endedAt: payload.endedAt ? new Date(payload.endedAt) : null,
+				},
+			});
+			return Response.json({ ok: true, id: session.id });
+		}
+
+		if (req.method === "GET" && url.pathname === "/api/kpis/today") {
+			const start = new Date();
+			start.setHours(0, 0, 0, 0);
+
+			const sessions = await prisma.focusSession.findMany({
+				where: {
+					createdAt: { gte: start },
+					phase: "focus",
+					completed: true,
+				},
+				orderBy: { createdAt: "desc" },
+			});
+
+			const focusSeconds = sessions.reduce((acc, s) => acc + s.elapsedSeconds, 0);
+			return Response.json({
+				focusMinutesToday: Math.floor(focusSeconds / 60),
+				completedPomodoros: sessions.length,
+			});
+		}
+
+		return new Response("Not found", { status: 404 });
 	},
 });
 
-// Quit the app when the main window is closed
-mainWindow.on("close", () => {
+const url = await getMainViewUrl();
+
+const mainWindow = new BrowserWindow({
+	title: "Aurelia",
+	url,
+	frame: {
+		width: 1100,
+		height: 760,
+		x: 180,
+		y: 140,
+	},
+});
+
+mainWindow.on("close", async () => {
+	await prisma.$disconnect();
 	Utils.quit();
 });
 
-console.log("React Tailwind Vite app started!");
+console.log("Aurelia app started!");
