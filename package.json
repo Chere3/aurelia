@@ -1,0 +1,13 @@
+{
+  "name": "executive-focus-os",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Desktop MVP for executive-grade Pomodoro focus system",
+  "license": "MIT",
+  "scripts": {
+    "dev": "echo \"Desktop scaffold pending\"",
+    "build": "echo \"Build scaffold pending\"",
+    "lint": "echo \"Lint scaffold pending\"",
+    "test": "echo \"Test scaffold pending\""
+  }
+}
