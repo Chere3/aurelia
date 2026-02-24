@@ -4,49 +4,35 @@ Desktop assistant de productividad personal (Pomodoro Pro + Integraciones + Hard
 
 ## Vision
 Aurelia convierte sesiones de enfoque en un sistema operativo personal de ejecución:
-- Timer Pomodoro avanzado con tasks, tags, métricas y streaks.
-- Integración con Google Calendar para sugerir bloques reales de enfoque.
-- Hard Focus Lock inteligente según tipo de tarea:
-  - **PC-required** → lock parcial (bloquea distracciones)
-  - **No-PC task** → lock agresivo (interacción del sistema restringida)
+- Timer Pomodoro avanzado con tasks, tags, métricas y streaks
+- Integración con Google Calendar para sugerir bloques reales de enfoque
+- Hard Focus Lock inteligente según tipo de tarea
 
-## MVP Scope
-- Desktop shell con Bun-first toolchain (Electrobun candidate, fallback Electron+Vite activo)
-- React + TypeScript
-- SQLite + Prisma
-- Zustand + UI ejecutiva
-- Motor de timer + policy engine
-- Adaptador de bloqueo Linux (NixOS-first)
+## Current repo state
+Actualmente el código ejecutable vive en `apps/desktop` y se opera desde scripts raíz.
+La estructura monorepo extendida (`packages/*`) está planificada y documentada en roadmap.
 
-## Monorepo Layout (MVP)
-```
-.
-├─ apps/
-│  └─ desktop/            # Electron + React app
-├─ packages/
-│  ├─ core/               # timer engine, task policy, analytics
-│  ├─ integrations/       # google calendar, spotify (post-MVP)
-│  └─ system-lock/        # OS adapters (linux/mac/windows)
-├─ docs/
-│  ├─ architecture.md
-│  ├─ roadmap.md
-│  └─ product-spec.md
-└─ .github/
-   ├─ workflows/ci.yml
-   └─ ISSUE_TEMPLATE/
-```
-
-## Quick Start (planned)
+## Quick start
 ```bash
-npm install
-npm run dev
+bun install
+bun run dev
 ```
 
-## Roadmap
-Consulta [`docs/roadmap.md`](docs/roadmap.md).
+## Quality checks
+```bash
+bun run typecheck
+bun run lint
+bun run build
+```
+
+## Documentation
+- Product spec: [`docs/product-spec.md`](docs/product-spec.md)
+- Architecture: [`docs/architecture.md`](docs/architecture.md)
+- Development guide: [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md)
+- Roadmap: [`ROADMAP.md`](ROADMAP.md)
 
 ## License
 MIT
 
 ## Internal Architecture Name
-- **Stratum Engine**: task classification + lock policy brain.
+**Stratum Engine**: task classification + lock policy brain.
