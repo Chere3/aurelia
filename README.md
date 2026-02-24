@@ -36,14 +36,23 @@ Aurelia convierte sesiones de enfoque en un sistema operativo personal de ejecuc
    └─ ISSUE_TEMPLATE/
 ```
 
-## Quick Start (planned)
+## Quick Start
 ```bash
-npm install
-npm run dev
+bun install
+bun run dev
+```
+
+## Quality commands
+```bash
+bun run lint
+bun run typecheck
+bun run build
+bun run check
 ```
 
 ## Roadmap
-Consulta [`docs/roadmap.md`](docs/roadmap.md).
+- Product roadmap: [`docs/roadmap.md`](docs/roadmap.md)
+- Execution/professionalization roadmap: [`ROADMAP.md`](ROADMAP.md)
 
 ## License
 MIT
