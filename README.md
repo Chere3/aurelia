@@ -4,22 +4,23 @@ Desktop assistant de productividad personal (Pomodoro Pro + Integraciones + Hard
 
 ## Vision
 Aurelia convierte sesiones de enfoque en un sistema operativo personal de ejecución:
+
 - Timer Pomodoro avanzado con tasks, tags, métricas y streaks.
 - Integración con Google Calendar para sugerir bloques reales de enfoque.
 - Hard Focus Lock inteligente según tipo de tarea:
   - **PC-required** → lock parcial (bloquea distracciones)
   - **No-PC task** → lock agresivo (interacción del sistema restringida)
 
-## MVP Scope
-- Desktop shell con Bun-first toolchain (Electrobun candidate, fallback Electron+Vite activo)
-- React + TypeScript
-- SQLite + Prisma
-- Zustand + UI ejecutiva
-- Motor de timer + policy engine
-- Adaptador de bloqueo Linux (NixOS-first)
+## Current stack
 
-## Monorepo Layout (MVP)
-```
+- Bun workspaces
+- React + TypeScript (desktop app)
+- SQLite + Prisma (planned baseline)
+- Zustand for client state
+
+## Monorepo layout (target)
+
+```txt
 .
 ├─ apps/
 │  └─ desktop/            # Electron + React app
@@ -36,17 +37,37 @@ Aurelia convierte sesiones de enfoque en un sistema operativo personal de ejecuc
    └─ ISSUE_TEMPLATE/
 ```
 
-## Quick Start (planned)
+## Quick start
+
 ```bash
-npm install
-npm run dev
+bun install
+bun run dev
 ```
 
-## Roadmap
-Consulta [`docs/roadmap.md`](docs/roadmap.md).
+### Quality checks
+
+```bash
+bun run typecheck
+bun run lint
+bun run build
+```
+
+> Note: `lint` is currently a placeholder and will be replaced by a real lint pipeline.
+
+## Planning docs
+
+- High-level roadmap: [`ROADMAP.md`](ROADMAP.md)
+- Product details: [`docs/product-spec.md`](docs/product-spec.md)
+- Architecture draft: [`docs/architecture.md`](docs/architecture.md)
+
+## Contributing
+
+See [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
 ## License
+
 MIT
 
-## Internal Architecture Name
+## Internal architecture codename
+
 - **Stratum Engine**: task classification + lock policy brain.
