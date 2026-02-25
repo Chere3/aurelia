@@ -13,6 +13,7 @@
     "dev": "cd apps/desktop && bun run dev",
     "build": "cd apps/desktop && bun run build",
     "typecheck": "cd apps/desktop && bunx tsc -b",
-    "lint": "echo 'lint pending'"
+    "lint": "bun run typecheck",
+    "validate": "bun run lint && bun run build"
   }
 }
