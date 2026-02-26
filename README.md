@@ -43,7 +43,8 @@ npm run dev
 ```
 
 ## Roadmap
-Consulta [`docs/roadmap.md`](docs/roadmap.md).
+- Execution roadmap: [`ROADMAP.md`](ROADMAP.md)
+- Product roadmap detail: [`docs/roadmap.md`](docs/roadmap.md)
 
 ## License
 MIT
