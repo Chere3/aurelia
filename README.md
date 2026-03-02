@@ -1,25 +1,21 @@
 # Aurelia
 
-Desktop assistant de productividad personal (Pomodoro Pro + Integraciones + Hard Focus Lock).
+Desktop assistant de productividad personal (**Pomodoro Pro + Integraciones + Hard Focus Lock**).
+
+[![CI](https://github.com/Chere3/aurelia/actions/workflows/ci.yml/badge.svg)](https://github.com/Chere3/aurelia/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 
 ## Vision
 Aurelia convierte sesiones de enfoque en un sistema operativo personal de ejecución:
-- Timer Pomodoro avanzado con tasks, tags, métricas y streaks.
-- Integración con Google Calendar para sugerir bloques reales de enfoque.
+- Timer Pomodoro avanzado con tasks, tags, métricas y streaks
+- Integración con Google Calendar para sugerir bloques reales de enfoque
 - Hard Focus Lock inteligente según tipo de tarea:
   - **PC-required** → lock parcial (bloquea distracciones)
   - **No-PC task** → lock agresivo (interacción del sistema restringida)
 
-## MVP Scope
-- Desktop shell con Bun-first toolchain (Electrobun candidate, fallback Electron+Vite activo)
-- React + TypeScript
-- SQLite + Prisma
-- Zustand + UI ejecutiva
-- Motor de timer + policy engine
-- Adaptador de bloqueo Linux (NixOS-first)
+## Monorepo layout
 
-## Monorepo Layout (MVP)
-```
+```text
 .
 ├─ apps/
 │  └─ desktop/            # Electron + React app
@@ -31,22 +27,39 @@ Aurelia convierte sesiones de enfoque en un sistema operativo personal de ejecuc
 │  ├─ architecture.md
 │  ├─ roadmap.md
 │  └─ product-spec.md
-└─ .github/
-   ├─ workflows/ci.yml
-   └─ ISSUE_TEMPLATE/
+└─ ROADMAP.md             # portfolio-facing roadmap (this repo)
 ```
 
-## Quick Start (planned)
+## Requirements
+- [Bun](https://bun.sh/) `>=1.0`
+- Node.js `22` (for compatibility with tooling/CI)
+
+## Quick start
+
 ```bash
-npm install
-npm run dev
+bun install
+bun run dev
 ```
+
+## Quality checks
+
+```bash
+bun run typecheck
+bun run check
+```
+
+## Scripts
+- `bun run dev` — start desktop app in development mode
+- `bun run build` — build renderer + electron main bundles
+- `bun run typecheck` — TypeScript validation for desktop app
+- `bun run check` — CI-friendly quality gate
 
 ## Roadmap
-Consulta [`docs/roadmap.md`](docs/roadmap.md).
+- Product and architecture details: [`docs/roadmap.md`](docs/roadmap.md)
+- Portfolio execution plan: [`ROADMAP.md`](./ROADMAP.md)
+
+## Contributing
+Read [`CONTRIBUTING.md`](./CONTRIBUTING.md) before submitting changes.
 
 ## License
 MIT
-
-## Internal Architecture Name
-- **Stratum Engine**: task classification + lock policy brain.
